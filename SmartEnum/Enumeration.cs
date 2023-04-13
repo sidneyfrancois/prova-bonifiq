@@ -2,7 +2,7 @@
 
 namespace ProvaPub.SmartEnum
 {
-    public class Enumeration : IComparable
+    public abstract class Enumeration<TEnum> : IComparable where TEnum : Enumeration<TEnum>
     {
         private readonly int _value;
         private readonly string _displayName;
