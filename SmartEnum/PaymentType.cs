@@ -18,7 +18,7 @@
 
             public override decimal FazerPagamento(decimal paymentValue)
             {
-                return paymentValue;
+                return paymentValue + 20;
             }
         }
 
@@ -28,7 +28,7 @@
 
             public override decimal FazerPagamento(decimal paymentValue)
             {
-                return paymentValue;
+                return paymentValue + 30;
             }
         }
 
@@ -38,7 +38,7 @@
 
             public override decimal FazerPagamento(decimal paymentValue)
             {
-                return paymentValue;
+                return paymentValue + 40;
             }
         }
     }

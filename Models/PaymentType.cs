@@ -1,6 +1,6 @@
 ﻿namespace ProvaPub.Models
 {
-    public enum PaymentType
+    public enum PaymentTypeEnum
     {
         Pix,
         CreditCard,
