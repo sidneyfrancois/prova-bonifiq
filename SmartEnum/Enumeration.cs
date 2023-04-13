@@ -2,7 +2,7 @@
 
 namespace ProvaPub.SmartEnum
 {
-    public abstract class Enumeration<TEnum> : IComparable where TEnum : Enumeration<TEnum>
+    public abstract class Enumeration<TEnum> where TEnum : Enumeration<TEnum>
     {
         private readonly int _value;
         private readonly string _displayName;
@@ -32,62 +32,29 @@ namespace ProvaPub.SmartEnum
             return DisplayName;
         }
 
-        public static IEnumerable<T> GetAll<T>() where T : Enumeration, new()
+        public static IEnumerable<T> GetAll<T>()
         {
             var type = typeof(T);
             var fields = type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly);
 
             foreach (var info in fields)
             {
-                var instance = new T();
-                var locatedValue = info.GetValue(instance) as T;
+                var locatedValue = info;
 
-                if (locatedValue != null)
+                if (type.IsAssignableFrom(locatedValue.FieldType) && locatedValue != null)
                 {
-                    yield return locatedValue;
+                    yield return (T)locatedValue.GetValue(default);
                 }
             }
         }
 
-        public override bool Equals(object obj)
+        public static TEnum FromValue(int value)
         {
-            var otherValue = obj as Enumeration;
-
-            if (otherValue == null)
-            {
-                return false;
-            }
-
-            var typeMatches = GetType().Equals(obj.GetType());
-            var valueMatches = _value.Equals(otherValue.Value);
-
-            return typeMatches && valueMatches;
-        }
-
-        public override int GetHashCode()
-        {
-            return _value.GetHashCode();
-        }
-
-        public static int AbsoluteDifference(Enumeration firstValue, Enumeration secondValue)
-        {
-            var absoluteDifference = Math.Abs(firstValue.Value - secondValue.Value);
-            return absoluteDifference;
-        }
-
-        public static T FromValue<T>(int value) where T : Enumeration, new()
-        {
-            var matchingItem = parse<T, int>(value, "value", item => item.Value == value);
+            var matchingItem = parse<TEnum, int>(value, "value", item => item.Value == value);
             return matchingItem;
         }
 
-        public static T FromDisplayName<T>(string displayName) where T : Enumeration, new()
-        {
-            var matchingItem = parse<T, string>(displayName, "display name", item => item.DisplayName == displayName);
-            return matchingItem;
-        }
-
-        private static T parse<T, K>(K value, string description, Func<T, bool> predicate) where T : Enumeration, new()
+        private static T parse<T, K>(K value, string description, Func<T, bool> predicate)
         {
             var matchingItem = GetAll<T>().FirstOrDefault(predicate);
 
@@ -98,11 +65,6 @@ namespace ProvaPub.SmartEnum
             }
 
             return matchingItem;
-        }
-
-        public int CompareTo(object other)
-        {
-            return Value.CompareTo(((Enumeration)other).Value);
         }
     }
 }
