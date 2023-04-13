@@ -1,4 +1,6 @@
-﻿namespace ProvaPub.Tests
+﻿using Xunit;
+
+namespace ProvaPub.Tests
 {
     public class CustomerServiceTests
     {
