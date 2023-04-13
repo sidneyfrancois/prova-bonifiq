@@ -4,7 +4,7 @@ namespace ProvaPub.Services
 {
 	public class OrderService
 	{
-		public async Task<Order> PayOrder(string paymentMethod, decimal paymentValue, int customerId)
+		public async Task<Order> PayOrder(PaymentType paymentMethod, decimal paymentValue, int customerId)
 		{
 			if (paymentMethod == "pix")
 			{
