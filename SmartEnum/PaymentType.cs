@@ -3,7 +3,6 @@
     public abstract class PaymentType : Enumeration<PaymentType>
     {
         private PaymentType(int value, string displayName) : base(value, displayName) { }
-        private PaymentType() { }
 
         public static readonly PaymentType Pix = new PixPayment();
         public static readonly PaymentType CreditCard = new CreditCardPayment();

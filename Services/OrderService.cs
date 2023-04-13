@@ -5,13 +5,13 @@ namespace ProvaPub.Services
 {
 	public class OrderService
 	{
-		public async Task<Order> PayOrder(string paymentMethod, decimal paymentValue, int customerId)
+        public async Task<Order> PayOrder(PaymentType paymentMethod, decimal paymentValue, int customerId)
 		{
 			// get paymentMethod based on the string value
-			var paymentT = PaymentType.FromDisplayName(paymentMethod);
+			//var paymentT = PaymentType.FromValue((int)paymentMethod);
 
 			// do the payment using the method of the specified payment method
-			var result = paymentT.FazerPagamento(paymentValue);
+			var result = paymentMethod.FazerPagamento(paymentValue);
 
 			return await Task.FromResult( new Order()
 			{

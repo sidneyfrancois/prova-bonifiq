@@ -2,75 +2,74 @@
 
 namespace ProvaPub.SmartEnum
 {
-    public abstract class Enumeration<TEnum> where TEnum : Enumeration<TEnum>
+    public enum Payment
+    {
+        Pix,
+        Card
+    };
+
+    public abstract class Enumeration<TEnum>: IEquatable<Enumeration<TEnum>> where TEnum : Enumeration<TEnum>
     {
         private readonly int _value;
         private readonly string _displayName;
 
-        protected Enumeration()
-        {
-        }
-
-        protected Enumeration(int value, string displayName)
+        protected Enumeration(int value, string name)
         {
             _value = value;
-            _displayName = displayName;
+            _displayName = name;
         }
 
-        public int Value
+        private static readonly Dictionary<int, TEnum> Enumerations = CreateEnumerations();
+
+        public static TEnum? FromValue(int value)
         {
-            get { return _value; }
+            return Enumerations.TryGetValue(value, out TEnum? enumeration) ? enumeration : default;
         }
 
-        public string DisplayName
+        public static TEnum? FromName(string name)
         {
-            get { return _displayName; }
+            return Enumerations.Values.SingleOrDefault(e => e._displayName == name);
+        }
+
+        public bool Equals(Enumeration<TEnum>? other)
+        {
+            if (other == null) return false;
+
+            return GetType() == other.GetType() && _value == other._value;
+
+            throw new NotImplementedException();
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is Enumeration<TEnum> other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return _value.GetHashCode();
         }
 
         public override string ToString()
         {
-            return DisplayName;
+            return _displayName;
         }
 
-        public static IEnumerable<T> GetAll<T>()
+        private static Dictionary<int, TEnum> CreateEnumerations()
         {
-            var type = typeof(T);
-            var fields = type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly);
+            var enumerationType = typeof(TEnum);
 
-            foreach (var info in fields)
-            {
-                var locatedValue = info;
+            var fieldsForType = enumerationType
+                .GetFields(
+                     BindingFlags.Public |
+                     BindingFlags.Static |
+                     BindingFlags.FlattenHierarchy)
+                .Where(fieldInfo =>
+                    enumerationType.IsAssignableFrom(fieldInfo.FieldType))
+                .Select(fieldInfo =>
+                    (TEnum)fieldInfo.GetValue(default)!);
 
-                if (type.IsAssignableFrom(locatedValue.FieldType) && locatedValue != null)
-                {
-                    yield return (T)locatedValue.GetValue(default);
-                }
-            }
-        }
-
-        public static TEnum FromValue(int value)
-        {
-            var matchingItem = parse<TEnum, int>(value, "value", item => item.Value == value);
-            return matchingItem;
-        }
-
-        public static TEnum FromDisplayName(string displayName)
-        {
-            var matchingItem = parse<TEnum, string>(displayName, "display name", item => item.DisplayName == displayName);
-            return matchingItem;
-        }
-
-        private static T parse<T, K>(K value, string description, Func<T, bool> predicate)
-        {
-            var matchingItem = GetAll<T>().FirstOrDefault(predicate);
-
-            if (matchingItem == null)
-            {
-                var message = string.Format("'{0}' is not a valid {1} in {2}", value, description, typeof(T));
-                throw new ApplicationException(message);
-            }
-
-            return matchingItem;
+            return fieldsForType.ToDictionary(x => x._value);
         }
     }
 }
