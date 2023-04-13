@@ -54,6 +54,12 @@ namespace ProvaPub.SmartEnum
             return matchingItem;
         }
 
+        public static TEnum FromDisplayName(string displayName)
+        {
+            var matchingItem = parse<TEnum, string>(displayName, "display name", item => item.DisplayName == displayName);
+            return matchingItem;
+        }
+
         private static T parse<T, K>(K value, string description, Func<T, bool> predicate)
         {
             var matchingItem = GetAll<T>().FirstOrDefault(predicate);
