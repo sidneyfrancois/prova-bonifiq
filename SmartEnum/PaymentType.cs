@@ -9,19 +9,37 @@
         public static readonly PaymentType CreditCard = new CreditCardPayment();
         public static readonly PaymentType Paypal = new PaypalPayment();
 
+        // portuguese name only for display purposes
+        public abstract decimal FazerPagamento(decimal paymentValue);
+
         private sealed class PixPayment : PaymentType
         {
             public PixPayment() : base(0, "Pix") { }
+
+            public override decimal FazerPagamento(decimal paymentValue)
+            {
+                return paymentValue;
+            }
         }
 
         private sealed class CreditCardPayment : PaymentType
         {
             public CreditCardPayment() : base(1, "Cartão de crédito") { }
+
+            public override decimal FazerPagamento(decimal paymentValue)
+            {
+                return paymentValue;
+            }
         }
 
         private sealed class PaypalPayment: PaymentType
         {
             public PaypalPayment() : base(2, "Paypal") { }
+
+            public override decimal FazerPagamento(decimal paymentValue)
+            {
+                return paymentValue;
+            }
         }
     }
 }
