@@ -2,7 +2,7 @@
 {
     public abstract class PageList
     {
-		public int TotalCount { get; set; }
-		public bool HasNext { get; set; }
+        public int TotalCount { get; set; } = 10;
+        public bool HasNext { get; set; } = false;
     }
 }
