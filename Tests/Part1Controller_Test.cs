@@ -7,6 +7,14 @@ namespace ProvaPub.Tests
     {
         private RandomService FactoryRandomService() => new RandomService();
 
+
+        [Fact]
+        public void FactoryRandomService_Create_SameTypeAsRandomService()
+        {
+            var randomService = FactoryRandomService();
+            Assert.IsType<RandomService>(randomService);
+        }
+
         [Fact]
         public void RandomService_GetRandom_CheckRandomnessReturn()
         {
