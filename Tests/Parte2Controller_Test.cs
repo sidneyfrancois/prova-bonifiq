@@ -11,9 +11,11 @@ namespace ProvaPub.Tests
 {
     public class Parte2Controller_Test
     {
-        [Fact(DisplayName = "Teste de ListProducts")]
+        [Theory(DisplayName = "Teste de ListProducts")]
         [Trait("Parte2Controller", "Parte2 Mock Test")]
-        public void Parte2Controller_ListProducts_ReturnSucess()
+        [InlineData(1)]
+        [InlineData(2)]
+        public void Parte2Controller_ListProducts_ReturnSucess(int page)
         {
             // Arrange
             var options = new DbContextOptionsBuilder<TestDbContext>()
@@ -27,10 +29,10 @@ namespace ProvaPub.Tests
             var productService = new ProductService(contextDb);
 
             // Act
-            ProductList listResult = productService.ListProducts(10);
+            ProductList listResult = productService.ListProducts(page);
 
             // Assert
-            Assert.Equal(10, listResult.Products.Count);
+            Assert.Equal(page*10, listResult.Products.Count);
         }
     }
 }
