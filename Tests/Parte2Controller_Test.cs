@@ -30,11 +30,11 @@ namespace ProvaPub.Tests
             var productService = new ProductService(_productFixture.productsContext);
 
             // Act
-            ProductList listResult = productService.ListProducts(page);
+            var listResult = productService.ListProducts(page);
 
             // Assert
-            Assert.Equal(10, listResult.Products.Count);
-            Assert.Equal(((page*10)), listResult.Products.Last().Id);
+            Assert.Equal(10, listResult.Count);
+            Assert.Equal(((page*10)), listResult.Last().Id);
         }
     }
 }
