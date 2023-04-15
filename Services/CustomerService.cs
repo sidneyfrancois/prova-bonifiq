@@ -40,14 +40,14 @@ namespace ProvaPub.Services
             return true;
         }
 
-        private async Task CheckCustomerIsFirstPurchase(int customerId, decimal purchaseValue)
+        public async Task CheckCustomerIsFirstPurchase(int customerId, decimal purchaseValue)
         {
             var haveBoughtBefore = await _ctx.Customers.CountAsync(s => s.Id == customerId && s.Orders.Any());
             if (haveBoughtBefore == 0 && purchaseValue > 100)
                 throw new InvalidOperationException($"Customer {customerId} can make a first purchase of maximum 100,00");
         }
 
-        private async Task CheckPurchaseValidation(int customerId)
+        public async Task CheckPurchaseValidation(int customerId)
         {
             var baseDate = DateTime.UtcNow.AddMonths(-1);
             var ordersInThisMonth = await _ctx.Orders.CountAsync(s => s.CustomerId == customerId && s.OrderDate >= baseDate);
@@ -55,7 +55,7 @@ namespace ProvaPub.Services
                 throw new InvalidOperationException($"Customer {customerId} can't make more purchases in this mounth (only one purchase per mounth");
         }
 
-        private async Task CheckCustomerExistence(int customerId)
+        public async Task CheckCustomerExistence(int customerId)
         {
             var customer = await _ctx.Customers.FindAsync(customerId);
             if (customer == null) throw new InvalidOperationException($"Customer Id {customerId} does not exists");
