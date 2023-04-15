@@ -10,7 +10,7 @@ using Xunit;
 
 namespace ProvaPub.Tests
 {
-    [Collection(nameof(ProductContext))]
+    [Collection(nameof(DbContextTest))]
     public class Parte2Controller_Test
     {
         private readonly Parte2Controller_Fixture_Test _productFixture;
@@ -27,7 +27,7 @@ namespace ProvaPub.Tests
         public void Parte2Controller_ListProducts_ReturnSucess(int page)
         {
             // Arrange
-            var productService = new ProductService(_productFixture.productsContext);
+            var productService = new ProductService(_productFixture._context);
 
             // Act
             var listResult = productService.ListProducts(page);
