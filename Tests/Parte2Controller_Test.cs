@@ -13,9 +13,9 @@ namespace ProvaPub.Tests
     [Collection(nameof(DbContextTest))]
     public class Parte2Controller_Test
     {
-        private readonly Parte2Controller_Fixture_Test _productFixture;
+        private readonly Context_Fixture_Test _productFixture;
 
-        public Parte2Controller_Test(Parte2Controller_Fixture_Test productFixture)
+        public Parte2Controller_Test(Context_Fixture_Test productFixture)
         {
             _productFixture = productFixture;
         }

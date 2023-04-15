@@ -8,15 +8,15 @@ using Xunit;
 namespace ProvaPub.Tests
 {
     [CollectionDefinition(nameof(DbContextTest))]
-    public class DbContextTest: ICollectionFixture<Parte2Controller_Fixture_Test>
+    public class DbContextTest: ICollectionFixture<Context_Fixture_Test>
     {}
 
 
-    public class Parte2Controller_Fixture_Test : IDisposable
+    public class Context_Fixture_Test : IDisposable
     {
         public TestDbContext _context { get; set; }
 
-        public Parte2Controller_Fixture_Test()
+        public Context_Fixture_Test()
         {
             _context = GenerateContext();
         }
