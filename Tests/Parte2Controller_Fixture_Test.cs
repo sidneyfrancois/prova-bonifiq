@@ -7,35 +7,39 @@ using Xunit;
 
 namespace ProvaPub.Tests
 {
-    [CollectionDefinition(nameof(ProductContext))]
-    public class ProductContext: ICollectionFixture<Parte2Controller_Fixture_Test>
+    [CollectionDefinition(nameof(DbContextTest))]
+    public class DbContextTest: ICollectionFixture<Parte2Controller_Fixture_Test>
     {}
 
 
     public class Parte2Controller_Fixture_Test : IDisposable
     {
-        public TestDbContext productsContext { get; set; }
+        public TestDbContext _context { get; set; }
 
         public Parte2Controller_Fixture_Test()
         {
-            productsContext = GenerateContext();
+            _context = GenerateContext();
         }
 
         public TestDbContext GenerateContext()
         {
             var options = new DbContextOptionsBuilder<TestDbContext>()
-                .UseInMemoryDatabase(databaseName: "ProductListDatabase")
+                .UseInMemoryDatabase(databaseName: "ProvaPubDatabase")
                 .Options;
 
             var contextDb = new TestDbContext(options);
+
+            // Seed data into InMemoryDatabase
             contextDb.Products.AddRange(contextDb.getProductSeed());
+            contextDb.Customers.AddRange(contextDb.getCustomerSeed());
+
             contextDb.SaveChanges();
             return contextDb;
         }
 
         public void Dispose()
         {
-
+            _context.Dispose();
         }
     }
 }
