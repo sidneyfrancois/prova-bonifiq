@@ -40,11 +40,10 @@ namespace ProvaPub.Services
             return true;
         }
 
-        public async Task CheckCustomerIsFirstPurchase(int customerId, decimal purchaseValue)
+        public async Task CheckCustomerExistence(int customerId)
         {
-            var haveBoughtBefore = await _ctx.Customers.CountAsync(s => s.Id == customerId && s.Orders.Any());
-            if (haveBoughtBefore == 0 && purchaseValue > 100)
-                throw new InvalidOperationException($"Customer {customerId} can make a first purchase of maximum 100,00");
+            var customer = await _ctx.Customers.FindAsync(customerId);
+            if (customer == null) throw new InvalidOperationException($"Customer Id {customerId} does not exists");
         }
 
         public async Task CheckPurchaseValidation(int customerId)
@@ -55,11 +54,11 @@ namespace ProvaPub.Services
                 throw new InvalidOperationException($"Customer {customerId} can't make more purchases in this mounth (only one purchase per mounth");
         }
 
-        public async Task CheckCustomerExistence(int customerId)
+        public async Task CheckCustomerIsFirstPurchase(int customerId, decimal purchaseValue)
         {
-            var customer = await _ctx.Customers.FindAsync(customerId);
-            if (customer == null) throw new InvalidOperationException($"Customer Id {customerId} does not exists");
+            var haveBoughtBefore = await _ctx.Customers.CountAsync(s => s.Id == customerId && s.Orders.Any());
+            if (haveBoughtBefore == 0 && purchaseValue > 100)
+                throw new InvalidOperationException($"Customer {customerId} can make a first purchase of maximum 100,00");
         }
-
     }
 }
