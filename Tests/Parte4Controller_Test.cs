@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
+using ProvaPub.Models;
 using ProvaPub.Services;
 using System;
 using System.Reflection;
@@ -16,6 +17,8 @@ namespace ProvaPub.Tests
         {
             _fixtureContext = fixtureContext;
         }
+
+
 
         [Theory(DisplayName = "Test if customer exists")]
         [Trait("Parte4Controller", "Parte4 Business Rule Test")]
@@ -35,6 +38,16 @@ namespace ProvaPub.Tests
 
             // Assert
             Assert.True(result.IsCompletedSuccessfully);
+        }
+
+        public void MockCustomerOrder(int customerId)
+        {
+            _fixtureContext._context.Orders.Add(new Order()
+            {
+                CustomerId = customerId,
+                OrderDate = DateTime.UtcNow.AddHours(-1),
+            });
+            _fixtureContext._context.SaveChanges();
         }
 
         [Theory(DisplayName = "Test exception if customer does not exist")]
@@ -88,6 +101,8 @@ namespace ProvaPub.Tests
         {
             // Arrange
             var customerService = new CustomerService(_fixtureContext._context);
+            var customer = _fixtureContext._context.Customers.Find(customerId);
+            MockCustomerOrder(customerId);
 
             // Act
             Func<Task> result = () => customerService.CheckPurchaseValidation(customerId);
