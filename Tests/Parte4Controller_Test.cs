@@ -77,6 +77,26 @@ namespace ProvaPub.Tests
             Assert.True(result.IsCompletedSuccessfully);
         }
 
+        [Theory(DisplayName = "Test exception if customer make more than one purchase in the mounth")]
+        [Trait("Parte4Controller", "Parte4 Business Rule Test")]
+        [InlineData(2)]
+        [InlineData(5)]
+        [InlineData(1)]
+        [InlineData(20)]
+        [InlineData(15)]
+        public async void Parte4Controller_CheckPurchaseValidation_ReturnException(int customerId)
+        {
+            // Arrange
+            var customerService = new CustomerService(_fixtureContext._context);
+
+            // Act
+            Func<Task> result = () => customerService.CheckPurchaseValidation(customerId);
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(result);
+
+            // Assert
+            Assert.Equal($"Customer {customerId} can't make more purchases in this mounth (only one purchase per mounth", exception.Message);
+        }
+
         [Theory(DisplayName = "Test if purchase is customer's first purchase")]
         [Trait("Parte4Controller", "Parte4 Business Rule Test")]
         [InlineData(2, 100)]
@@ -96,6 +116,8 @@ namespace ProvaPub.Tests
             // Assert
             Assert.True(result.IsCompletedSuccessfully);
         }
+
+
 
         [Theory(DisplayName = "Test if customer can purchase")]
         [Trait("Parte4Controller", "Parte4 Business Rule Test")]
