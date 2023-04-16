@@ -2,6 +2,7 @@
 using ProvaPub.Models;
 using ProvaPub.Services;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
@@ -18,7 +19,24 @@ namespace ProvaPub.Tests
             _fixtureContext = fixtureContext;
         }
 
+        public void MockOrder(int customerId)
+        {
+            var newOrder = new Order()
+            {
+                CustomerId = customerId,
+                OrderDate = DateTime.UtcNow.AddHours(-1),
+            };
 
+            _fixtureContext._context.Orders.Add(newOrder);
+
+            _fixtureContext._context.SaveChanges();
+        }
+
+        public void RemoveMockOrder(int customerId)
+        {
+            _fixtureContext._context.Customers.Find(customerId).Orders = null;
+            _fixtureContext._context.SaveChanges();
+        }
 
         [Theory(DisplayName = "Test if customer exists")]
         [Trait("Parte4Controller", "Parte4 Business Rule Test")]
@@ -38,16 +56,6 @@ namespace ProvaPub.Tests
 
             // Assert
             Assert.True(result.IsCompletedSuccessfully);
-        }
-
-        public void MockCustomerOrder(int customerId)
-        {
-            _fixtureContext._context.Orders.Add(new Order()
-            {
-                CustomerId = customerId,
-                OrderDate = DateTime.UtcNow.AddHours(-1),
-            });
-            _fixtureContext._context.SaveChanges();
         }
 
         [Theory(DisplayName = "Test exception if customer does not exist")]
@@ -102,7 +110,7 @@ namespace ProvaPub.Tests
             // Arrange
             var customerService = new CustomerService(_fixtureContext._context);
             var customer = _fixtureContext._context.Customers.Find(customerId);
-            MockCustomerOrder(customerId);
+            MockOrder(customerId);
 
             // Act
             Func<Task> result = () => customerService.CheckPurchaseValidation(customerId);
@@ -132,7 +140,26 @@ namespace ProvaPub.Tests
             Assert.True(result.IsCompletedSuccessfully);
         }
 
+        [Theory(DisplayName = "Test exception if is not the first purchase and if purchase's value is bigger than 100")]
+        [Trait("Parte4Controller", "Parte4 Business Rule Test")]
+        [InlineData(2, 101)]
+        [InlineData(5, 120)]
+        [InlineData(1, 180)]
+        [InlineData(20, 150)]
+        [InlineData(15, 140)]
+        public async void Parte4Controller_CheckFirstPurchase_ReturnException(int customerId, decimal purchaseValue)
+        {
+            // Arrange
+            var customerService = new CustomerService(_fixtureContext._context);
+            RemoveMockOrder(customerId);
 
+            // Act
+            Func<Task> result = () => customerService.CheckCustomerIsFirstPurchase(customerId, purchaseValue);
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(result);
+
+            // Assert
+            Assert.Equal($"Customer {customerId} can make a first purchase of maximum 100,00", exception.Message);
+        }
 
         [Theory(DisplayName = "Test if customer can purchase")]
         [Trait("Parte4Controller", "Parte4 Business Rule Test")]
