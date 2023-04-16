@@ -35,5 +35,25 @@ namespace ProvaPub.Tests
             // Assert
             Assert.True(result.IsCompletedSuccessfully);
         }
+
+        [Theory(DisplayName = "Test if purchase is valid")]
+        [Trait("Parte4Controller", "Parte4 Business Rule Test")]
+        [InlineData(2)]
+        [InlineData(5)]
+        [InlineData(1)]
+        [InlineData(20)]
+        [InlineData(15)]
+        public void Parte4Controller_CheckPurchaseValidation_CompleteTaskSuccessfully(int customerId)
+        {
+            // Arrange
+            var customerService = new CustomerService(_fixtureContext._context);
+
+            // Act
+            Task result = customerService.CheckPurchaseValidation(customerId);
+            result.Wait();
+
+            // Assert
+            Assert.True(result.IsCompletedSuccessfully);
+        }
     }
 }
