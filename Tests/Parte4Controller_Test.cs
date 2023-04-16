@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 using ProvaPub.Services;
+using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
@@ -34,6 +35,26 @@ namespace ProvaPub.Tests
 
             // Assert
             Assert.True(result.IsCompletedSuccessfully);
+        }
+
+        [Theory(DisplayName = "Test exception if customer does not exist")]
+        [Trait("Parte4Controller", "Parte4 Business Rule Test")]
+        [InlineData(23)]
+        [InlineData(25)]
+        [InlineData(50)]
+        [InlineData(40)]
+        [InlineData(100)]
+        public async void Parte4Controller_CheckCustomerExistence_ReturnException(int customerId)
+        {
+            // Arrange
+            var customerService = new CustomerService(_fixtureContext._context);
+
+            // Act
+            Func<Task> result = () => customerService.CheckCustomerExistence(customerId);
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(result);
+
+            // Assert
+            Assert.Equal($"Customer Id {customerId} does not exists", exception.Message);
         }
 
         [Theory(DisplayName = "Test if purchase is valid")]
