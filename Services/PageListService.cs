@@ -2,10 +2,10 @@
 using ProvaPub.Repository;
 using System.Threading;
 
-namespace ProvaPub.Models
+namespace ProvaPub.Services
 {
-    public abstract class PageList<T> where T : class
-    { 
+    public abstract class PageListService<T> where T : class
+    {
         public int TotalCount { get; set; } = 10;
 
         public List<T> ListPage(int page, TestDbContext ctx)
