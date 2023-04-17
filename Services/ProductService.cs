@@ -1,9 +1,10 @@
-﻿using ProvaPub.Models;
+﻿using Castle.Core.Resource;
+using ProvaPub.Models;
 using ProvaPub.Repository;
 
 namespace ProvaPub.Services
 {
-	public class ProductService
+	public class ProductService : PageList<Product>
 	{
 		TestDbContext _ctx;
 
@@ -14,11 +15,7 @@ namespace ProvaPub.Services
 
 		public List<Product> ListProducts(int page)
 		{
-			var productPageList = new PageList<Product>();
-
-			productPageList.ResultPageList = _ctx.Products.Skip((page - 1) * productPageList.TotalCount).Take(productPageList.TotalCount).ToList();
-
-			return productPageList.ResultPageList;
+			return ListPage(page, _ctx);
 		}
 
 	}
