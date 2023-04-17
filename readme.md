@@ -1,100 +1,61 @@
 # Prova BonifiQ Backend
-Olá!
-Essa prova foi criada para testar suas habilidades com .NET e C# em geral. 
-Por favor, siga atentamente as instruções antes de começar, ok?
 
-Não conseguiu fazer alguma etapa? Blza, entrega o que você conseguir ;)
+Prova concluída
 
-## Para começar
-O primeiro passo é criar uma **cópia** deste repositório. Por favor, perceba que fazer uma cópia é diferente de realizar um clone ou fork. Siga os passos abaixo para fazer a cópia:
+## Solução Parte1Controller
 
-- Crie um novo repositório em sua conta do GitHub. Dê o nome de ***prova-bonifiq***
-- Abra seu client do git e siga os comandos:
+Para resolver o bug foi necessário utilizar um outro tipo de registro de depêndencia. O `RandomService.cs` estava registrado como Singleton e por isso sempre retornava o mesmo número pois só foi instanciado uma vez sendo utilizado por toda a aplicação.
+Registrando `RandomService.cs` como Scoped soluciona o problema, pois agora o objeto será instanciado para cada requisição. Mas poderiamos registrar como Transient se quissemos utilizar este serviço em outras classes da aplicação já que seria instanciado sempre que fosse solicitado independente da requisição.
+
+## Solução Parte2Controller
+
+Foi utilizado os metódos `Skip()` e `Take()` na linq query para retornar o número de itens de acordo com a página e da quantidade de itens por página.
+
+Remover o uso do context dos Controllers e inserir os serviços `ProductService.cs` e `CustomerService.cs` como injeção de dependência (registrando como Scoped).
+
+Remoção das classes `ProductList.cs` e `CustomerList.cs` que foram substituídas pela classe `PageListService.cs`, uma classe abstrata genérica que retorna os itens da página específica.
+
+Os serviços `CustomerService.cs` e `ProductService.cs` vão herdar a classe `PageListService.cs` e utilizar o metódo implementado na clase abstrata genérica para retornar os itens da página.
+
+## Solução Parte3Controller
+
+Para está solução foi pensado no uso de smart enums, simular um enum que enumera classes ao invés de simples chave-valor (string-int).
+
+Foi criado um SmartEnum, nele são inserida metódos básicos para retornar a classe específicada de acordo com o valor da string ou pelo int, assim como nos enum do C#.
+
+Todas as classes enumeradas são inseridas no `PaymentType.cs` que implementa a classe abstrata genérica `Enumeration.cs`. Na classe `PaymentType.cs` também é declarado metódos abstratos para serem implementados em cada classe (`PaymentByPix.cs`, `PaymentByPaypal.cs`, `PaymentByCreditCard.cs`)
+
+Assim, podemos utilizar um enum padrão para ser passado como parametro no controller (`PaymentTypeEnum.cs`) e utilizar o seu valor no metódo PayOrder para selecionar a classe específica e executar o metódo de pagamento.
+
+Mas essa implementação permite também que o código antigo seja mantido, ou seja, o parâmetro pode continuar sendo `string paymentMethod`, dessa forma apenas teríamos que buscar a classe específicada pela string ao invés de buscar pelo valor de int.
+
 ```
-git clone --bare https://github.com/bonifiq/prova-backend.git
-```
-Esse comando gera uma cópia do repositório da prova em seu computador. Agora, continue com os comandos
-```
-cd prova-backend.git
-git push --mirror https://github.com/SEUSUARIO/prova-bonifiq.git
-```
-Note que você precisa alterar o SEUUSUARIO pelo seu username do GitHub, utilizado para criar o repositório no primeiro passo.
-Você pode apagar o diretório ```prova-backend.git``` que foi criado em seu computador.
-
-Tudo certo: você possui um repositório em seu nome com tudo que precisa para começar responder sua prova. Agora sim, faça o clone (git clone) em sua máquina e você está pronto para trabalhar.
-```
-git clone https://github.com/SEUSUARIO/prova-bonifiq.git
+var paymentT = PaymentType.FromDisplayName(paymentMethod);
 ```
 
-> Lembre-se: NÃO gere um Fork do repositório. Siga os passos acima para copiar o repositório para sua conta.
+Da mesma forma poderíamos receber como parâmetro um int `int paymentMethod`, só seria necessário fazer a seguinte mudança:
 
-## Conhecendo o projeto
-> Nós recomendamos que você utilize o Visual Studio 2022 (pode ser a versão community). Você também precisa do .NET 6 instalado, ok?
-Ah, não esquece de instalar o pacote de desenvolvimento para o ASP NET durante a instalação do Visual Studio.
-
-Ao abrir o projeto no Visual Studio, você pode notar que se trata de um projeto Web API do ASP NET.  Você pode se orientar pela pasta ```Controllers``. 
-Dentro dela, cada Controller representa uma etapa da prova.  Logo abaixo vamos falar mais sobre essas etapas e como resolvê-las.
-
-Antes de rodar o projeto, você precisa rodar as migrations. Para isso, primeiro instale o [EF Tools](https://learn.microsoft.com/en-us/ef/core/get-started/overview/install#get-the-entity-framework-core-tools):
 ```
-dotnet tool install --global dotnet-ef
+var paymentT = PaymentType.FromValue(paymentMethod);
 ```
-Agora, pode rodar as migrations de fato:
-```
-dotnet ef update database
-``` 
 
-Pronto, o projeto já criou as tabelas e alguns registros no seu localDB. 
+Dessa forma temos mais flexibilidade para mudar o tipo de parâmetro e inserir novas formas de pagamento.
 
+## Solução Parte4Controller
 
-Rode o projeto e, se tudo deu certo, você deverá ver uma página do Swagger com as APIs que utilizaremos no teste.
+As regras de negócio foram separadas em 3 metódos distintos, assim fica mais fácil realizar testes pois agora podemos testar uma regra de negócio por ver.
 
-Dê uma passeada pelo projeto e note que ele tem alguns probleminhas de arquitetura. Vamos resolver isso já já
+Fixture para instanciar o contexto (InMemory) e inserir dados no banco de dados de teste.
 
+Testes para verificar quando o metódo retorna uma `Task` com sucesso e para verificar se é retornado uma `Exception` com a mensagem específicada.
 
-## Seu trabalho
-Certo, tudo configurado e rodando. Agora vamos explicar o que você precisa fazer.
+Testes estão localizados no arquivo de teste `Parte4Controller_Test.cs`
 
-### Parte1Controller
-Esse controller foi criado para gerar uma API que sempre retorna um número aleatório. 
-Você pode vê-lo funcionando ao rodar o projeto e na página do Swagger, clique em Parte 1 > Try it Out > Execute.
+## O que ainda pode ser melhorado
 
-Esse código, no entanto, tem algum problema: ele sempre retorna o mesmo valor.
-Seu trabalho, portanto, é corrigir esse comportamente: cada vez que a chamada é realizada um número diferente deverá ser retornado.
-
-### Parte2Controller
-Essa API deveria retornar os produtos cadastrados de forma paginada. O usuário informa a página (page) desejada e o sistema retorna os 10 itens da mesma.
-O problema é que não importa qual número de página é utilizado: os resultados estão vindo sempre os mesmos. E não apenas os 10.
-
-Você precisa portanto:
-1. Corrigir o bug de paginação. Ao passar page=1, deveria ser retornado os 10 (0 a 9) primeiros itens do banco. Ao passar page=2 deveria ser retornado os itens subsequentes (10 a 19), etc
-2. Note que na Action do Controller, chamamos o ```ProductService```. Fazemos isso, instanciando o mesmo (```var productService = new ProductService(_ctx);```). Essa é uma prática ruim. Altere o código para que utilize Injeção de Dependência.
-3. Agora, explore os arquivos ```/Models/CustomerList``` e ```/Models/ProductList```. Eles são bem parecidos. De fato, deve haver uma forma melhor de criar esses objetos, com menos repetição de código. Faça essa alteração.
-4. Da mesma forma, como você melhoraria o ```CustomerService```e o ```ProductService``` para evitar repetição de código?
-
-### Parte3Controller
-Essa API cria o pagamento de uma compra (```PlaceOrder```). Verifique o método ```PayOrder``` da classe ```OrderService```.
-Você deve ter percebido que existem diversas formas de pagamento (Pix, cartão de crédito, paypal), certo?
-Essa classe, no entanto, é problemática. Imagine que teríamos que incluir um novo método de pagamento, seria mais um ```if```na estrutura.
-
-Você precisa:
-1. Faça uma alteração na arquitetura para que fique mais bem estruturado e preparado para o futuro.
-Tenha certeza que o princípio Open-Closed será respeitado.
-
-### Parte4Controller
-Essa API faz uma validação de negócio e retorna se o consumidor pode realizar uma compra.
-Verifique o arquivo ```CanPurchase``` da classe ```CustomerService``` e note que ele aplica diversas regras de negócio.
-
-Seu trabalho aqui será:
-1. Crie testes unitários para este método. Tente obter o máximo de cobertura possível. Se precisar, pode rearquitetar o código para facilitar nos testes.
-
-Você pode utilizar qualquer framework de testes que desejar. 
-
-## Como entregar
-Oba! Terminou tudinho? Agora faça o seguinte:
-1. Faça ```push``` para seu repositório (sim, aquele que você criou lá em cima. Nada de fork).
-2. Forneça acesso ao repositório no GitHub para o usuário ```sandercamargo```
-2. Preencha o formulário abaixo:
-[https://forms.gle/mHipmDJJnij7FRHE7](https://forms.gle/mHipmDJJnij7FRHE7)
-
-A gente te responde em breve, ok?
+- Usar outra forma de trazer um número randomico.
+- Fazer uso da variável `HasNext` para verificar se é possível solicitar mais uma página e assim não fazer requisições desnecessárias.
+- Uso de interfaces para específicar metódos de pagamento.
+- Utilizar o SmartEnums implementado do [pacote nuget de Ardalis](https://github.com/ardalis/SmartEnum)
+- Inserção de mais casos de testes.
+- Fixture de serviços ao invés de apenas o contexto.
